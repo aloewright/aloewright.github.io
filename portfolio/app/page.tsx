@@ -2,8 +2,9 @@
 
 import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
-import { ExternalLink, Github, Star, GitFork } from "lucide-react"
+import { ExternalLink, Github, Star, GitFork, Linkedin, Globe } from "lucide-react"
 import Image from "next/image"
+import { CodingDays } from "@/components/coding-days"
 
 interface GitHubProfile {
   name: string
@@ -79,7 +80,7 @@ export default function Home() {
                   height={120}
                   className="rounded-full border-4 border-border"
                 />
-                <div className="text-center md:text-left">
+                <div className="flex-1 text-center md:text-left">
                   <h1 className="text-3xl font-bold">{profile.name || username}</h1>
                   <p className="text-muted-foreground">@{profile.login}</p>
                   {profile.bio && (
@@ -96,14 +97,33 @@ export default function Home() {
                       <strong className="text-foreground">{profile.following}</strong> following
                     </span>
                   </div>
-                  <div className="mt-4">
+                  
+                  {/* Social Links */}
+                  <div className="mt-4 flex gap-2 justify-center md:justify-start">
                     <Button asChild>
                       <a href={profile.html_url} target="_blank" rel="noopener noreferrer">
                         <Github className="mr-2 h-4 w-4" />
-                        View GitHub Profile
+                        GitHub
+                      </a>
+                    </Button>
+                    <Button asChild variant="outline">
+                      <a href="https://linkedin.com/in/aloewright" target="_blank" rel="noopener noreferrer">
+                        <Linkedin className="mr-2 h-4 w-4" />
+                        LinkedIn
+                      </a>
+                    </Button>
+                    <Button asChild variant="outline">
+                      <a href="https://aloewright.com" target="_blank" rel="noopener noreferrer">
+                        <Globe className="mr-2 h-4 w-4" />
+                        Website
                       </a>
                     </Button>
                   </div>
+                </div>
+                
+                {/* Coding Days Card */}
+                <div className="mt-6 md:mt-0">
+                  <CodingDays username={username} />
                 </div>
               </>
             )}
