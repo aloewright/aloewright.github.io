@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button"
 import { ExternalLink, Github, Star, GitFork, Linkedin, Globe } from "lucide-react"
 import Image from "next/image"
 import { CodingDays } from "@/components/coding-days"
+import { useIntersectionObserver } from "@/hooks/use-intersection-observer"
+import { cn } from "@/lib/utils"
 
 interface GitHubProfile {
   name: string
@@ -34,6 +36,25 @@ interface GitHubRepo {
 
 interface RepoWithTitle extends GitHubRepo {
   displayTitle: string
+}
+
+// Animated section component
+function AnimatedSection({ children, className = "", delay = 0 }: { children: React.ReactNode, className?: string, delay?: number }) {
+  const { elementRef, isVisible } = useIntersectionObserver()
+  
+  return (
+    <div 
+      ref={elementRef}
+      className={cn(
+        "fade-in-section",
+        isVisible && "visible",
+        className
+      )}
+      style={{ transitionDelay: `${delay}ms` }}
+    >
+      {children}
+    </div>
+  )
 }
 
 export default function Home() {
@@ -128,7 +149,10 @@ export default function Home() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-pulse text-muted-foreground">Loading...</div>
+        <div className="text-center">
+          <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto"></div>
+          <p className="mt-4 text-muted-foreground animate-pulse">Loading portfolio...</p>
+        </div>
       </div>
     )
   }
@@ -141,14 +165,17 @@ export default function Home() {
           <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
             {profile && (
               <>
-                <Image
-                  src={profile.avatar_url}
-                  alt={profile.name || username}
-                  width={120}
-                  height={120}
-                  className="rounded-full border-4 border-border"
-                />
-                <div className="flex-1 text-center md:text-left">
+                <AnimatedSection delay={0}>
+                  <Image
+                    src={profile.avatar_url}
+                    alt={profile.name || username}
+                    width={120}
+                    height={120}
+                    className="rounded-full border-4 border-border animate-fadeInScale"
+                  />
+                </AnimatedSection>
+                
+                <AnimatedSection className="flex-1 text-center md:text-left" delay={200}>
                   <h1 className="text-3xl font-bold">{profile.name || username}</h1>
                   <p className="text-muted-foreground">@{profile.login}</p>
                   {profile.bio && (
@@ -168,31 +195,31 @@ export default function Home() {
                   
                   {/* Social Links */}
                   <div className="mt-4 flex gap-2 justify-center md:justify-start">
-                    <Button asChild>
+                    <Button asChild className="transition-all hover:scale-105">
                       <a href={profile.html_url} target="_blank" rel="noopener noreferrer">
                         <Github className="mr-2 h-4 w-4" />
                         GitHub
                       </a>
                     </Button>
-                    <Button asChild variant="outline">
+                    <Button asChild variant="outline" className="transition-all hover:scale-105">
                       <a href="https://linkedin.com/in/aloewright" target="_blank" rel="noopener noreferrer">
                         <Linkedin className="mr-2 h-4 w-4" />
                         LinkedIn
                       </a>
                     </Button>
-                    <Button asChild variant="outline">
+                    <Button asChild variant="outline" className="transition-all hover:scale-105">
                       <a href="https://aloewright.com" target="_blank" rel="noopener noreferrer">
                         <Globe className="mr-2 h-4 w-4" />
                         Website
                       </a>
                     </Button>
                   </div>
-                </div>
+                </AnimatedSection>
                 
                 {/* Coding Days Card */}
-                <div className="mt-6 md:mt-0">
+                <AnimatedSection className="mt-6 md:mt-0" delay={400}>
                   <CodingDays username={username} />
-                </div>
+                </AnimatedSection>
               </>
             )}
           </div>
@@ -201,14 +228,21 @@ export default function Home() {
 
       {/* Repositories Section */}
       <section className="container mx-auto px-4 py-8">
-        <h2 className="text-2xl font-bold mb-6">Repositories</h2>
+        <AnimatedSection delay={600}>
+          <h2 className="text-2xl font-bold mb-6">Repositories</h2>
+        </AnimatedSection>
+        
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {repos.map((repo) => (
-            <div key={repo.id} className="group">
+          {repos.map((repo, index) => (
+            <AnimatedSection 
+              key={repo.id} 
+              delay={700 + (index * 100)}
+              className="group"
+            >
               <Button
                 asChild
                 variant="outline"
-                className="w-full h-auto p-4 flex flex-col items-start text-left hover:shadow-lg transition-all"
+                className="w-full h-auto p-4 flex flex-col items-start text-left hover:shadow-lg transition-all hover:scale-[1.02] hover:border-primary/50"
               >
                 <a href={repo.html_url} target="_blank" rel="noopener noreferrer">
                   <div className="w-full">
@@ -216,7 +250,7 @@ export default function Home() {
                       <h3 className="font-semibold text-base group-hover:text-primary transition-colors">
                         {repo.displayTitle}
                       </h3>
-                      <ExternalLink className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                      <ExternalLink className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-all group-hover:rotate-12" />
                     </div>
                     {repo.description && (
                       <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
@@ -258,7 +292,7 @@ export default function Home() {
                   </div>
                 </a>
               </Button>
-            </div>
+            </AnimatedSection>
           ))}
         </div>
       </section>
