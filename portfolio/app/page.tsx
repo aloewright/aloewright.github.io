@@ -26,14 +26,46 @@ interface GitHubRepo {
   forks_count: number
   language: string
   topics: string[]
+  default_branch: string
+  owner: {
+    login: string
+  }
+}
+
+interface RepoWithTitle extends GitHubRepo {
+  displayTitle: string
 }
 
 export default function Home() {
   const [profile, setProfile] = useState<GitHubProfile | null>(null)
-  const [repos, setRepos] = useState<GitHubRepo[]>([])
+  const [repos, setRepos] = useState<RepoWithTitle[]>([])
   const [loading, setLoading] = useState(true)
 
   const username = "aloewright"
+
+  // Extract title from README content
+  const extractTitleFromReadme = (content: string): string | null => {
+    // Decode base64 content
+    const decodedContent = atob(content)
+    
+    // Look for the first H1 header (# Title or Title\n===)
+    const h1Match = decodedContent.match(/^#\s+(.+)$/m) || 
+                    decodedContent.match(/^(.+)\n={3,}$/m)
+    
+    if (h1Match) {
+      return h1Match[1].trim()
+    }
+    
+    // If no H1, look for the first H2 header
+    const h2Match = decodedContent.match(/^##\s+(.+)$/m) || 
+                    decodedContent.match(/^(.+)\n-{3,}$/m)
+    
+    if (h2Match) {
+      return h2Match[1].trim()
+    }
+    
+    return null
+  }
 
   useEffect(() => {
     const fetchGitHubData = async () => {
@@ -45,8 +77,44 @@ export default function Home() {
 
         // Fetch repos
         const reposRes = await fetch(`https://api.github.com/users/${username}/repos?sort=updated&per_page=100`)
-        const reposData = await reposRes.json()
-        setRepos(reposData)
+        const reposData: GitHubRepo[] = await reposRes.json()
+        
+        // Fetch README for each repo to get titles
+        const reposWithTitles = await Promise.all(
+          reposData.map(async (repo) => {
+            let displayTitle = repo.name
+            
+            try {
+              // Try to fetch README
+              const readmeRes = await fetch(
+                `https://api.github.com/repos/${repo.owner.login}/${repo.name}/readme`,
+                {
+                  headers: {
+                    'Accept': 'application/vnd.github.v3+json'
+                  }
+                }
+              )
+              
+              if (readmeRes.ok) {
+                const readmeData = await readmeRes.json()
+                const extractedTitle = extractTitleFromReadme(readmeData.content)
+                if (extractedTitle) {
+                  displayTitle = extractedTitle
+                }
+              }
+            } catch (error) {
+              // If README fetch fails, keep using repo name
+              console.log(`No README found for ${repo.name}`)
+            }
+            
+            return {
+              ...repo,
+              displayTitle
+            }
+          })
+        )
+        
+        setRepos(reposWithTitles)
       } catch (error) {
         console.error("Error fetching GitHub data:", error)
       } finally {
@@ -146,7 +214,7 @@ export default function Home() {
                   <div className="w-full">
                     <div className="flex items-center justify-between w-full mb-2">
                       <h3 className="font-semibold text-base group-hover:text-primary transition-colors">
-                        {repo.name}
+                        {repo.displayTitle}
                       </h3>
                       <ExternalLink className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
                     </div>
