@@ -36,7 +36,7 @@ export default async function Home() {
 
   return (
     <main className="container mx-auto max-w-4xl px-4 py-12 flex flex-col gap-12">
-      <header className="flex flex-col sm:flex-row items-center gap-6">
+      <header className="flex flex-col sm:flex-row items-center gap-6 fade-in-up" style={{animationDelay: '100ms'}}>
         <Image
           src={user.avatar_url}
           alt={user.name ?? username}
@@ -44,21 +44,22 @@ export default async function Home() {
           height={112}
           className="rounded-full border border-border"
         />
-        <div className="text-center sm:text-left">
+        <div className="text-center sm:text-left fade-in-up" style={{animationDelay: '200ms'}}>
           <h1 className="text-3xl font-bold">{user.name ?? username}</h1>
           {user.bio && <p className="text-muted-foreground mt-2 max-w-prose">{user.bio}</p>}
         </div>
       </header>
 
       <section>
-        <h2 className="text-2xl font-semibold mb-6">Repositories</h2>
+        <h2 className="text-2xl font-semibold mb-6 fade-in-up" style={{animationDelay: '300ms'}}>Repositories</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-          {repos.map((repo) => (
+          {repos.map((repo, i) => (
             <Button
               asChild
               key={repo.id}
               variant="outline"
-              className="justify-start overflow-hidden text-ellipsis whitespace-nowrap"
+              className="justify-start overflow-hidden text-ellipsis whitespace-nowrap fade-in-up"
+              style={{animationDelay: `${400 + i*50}ms`}}
             >
               <a href={repo.html_url} target="_blank" rel="noreferrer" title={repo.description ?? repo.name}>
                 {repo.name}
