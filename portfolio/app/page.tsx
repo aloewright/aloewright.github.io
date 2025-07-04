@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
+import { Github, Linkedin, Globe } from "lucide-react";
 
 const username = "aloewright";
 
@@ -47,6 +48,24 @@ export default async function Home() {
         <div className="text-center sm:text-left fade-in-up" style={{animationDelay: '200ms'}}>
           <h1 className="text-3xl font-bold">{user.name ?? username}</h1>
           {user.bio && <p className="text-muted-foreground mt-2 max-w-prose">{user.bio}</p>}
+          {/* Social links */}
+          <div className="flex flex-wrap justify-center sm:justify-start gap-2 mt-4 fade-in-up" style={{animationDelay:'250ms'}}>
+            <Button asChild size="sm" variant="outline">
+              <a href={user.html_url} target="_blank" rel="noreferrer" className="flex items-center gap-1">
+                <Github className="h-4 w-4" /> GitHub
+              </a>
+            </Button>
+            <Button asChild size="sm" variant="outline">
+              <a href="https://linkedin.com/in/aloewright" target="_blank" rel="noreferrer" className="flex items-center gap-1">
+                <Linkedin className="h-4 w-4" /> LinkedIn
+              </a>
+            </Button>
+            <Button asChild size="sm" variant="outline">
+              <a href="https://aloewright.com" target="_blank" rel="noreferrer" className="flex items-center gap-1">
+                <Globe className="h-4 w-4" /> Website
+              </a>
+            </Button>
+          </div>
         </div>
       </header>
 
