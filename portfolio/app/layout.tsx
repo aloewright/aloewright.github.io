@@ -1,31 +1,4 @@
 import type { Metadata } from "next";
-<<<<<<< HEAD
-import "./globals.css";
-
-export async function generateMetadata(): Promise<Metadata> {
-  const username = "aloewright"
-  
-  try {
-    const res = await fetch(`https://api.github.com/users/${username}`)
-    const profile = await res.json()
-    
-    return {
-      title: `${profile.name || username} - Portfolio`,
-      description: profile.bio || `${username}'s GitHub Portfolio`,
-      icons: {
-        icon: profile.avatar_url,
-        shortcut: profile.avatar_url,
-        apple: profile.avatar_url,
-      },
-    }
-  } catch {
-    return {
-      title: `${username} - Portfolio`,
-      description: `${username}'s GitHub Portfolio`,
-    }
-  }
-}
-=======
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
@@ -48,7 +21,6 @@ export const metadata: Metadata = {
     icon: `https://avatars.githubusercontent.com/${username}`,
   },
 };
->>>>>>> 72aee49 (Create Next.js portfolio with GitHub profile and repository integration)
 
 export default function RootLayout({
   children,
@@ -57,17 +29,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-<<<<<<< HEAD
-      <body className="antialiased">
-=======
       <head>
         <link rel="icon" href={`https://avatars.githubusercontent.com/${username}`} />
         <title>{metadata.title as string}</title>
       </head>
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
->>>>>>> 72aee49 (Create Next.js portfolio with GitHub profile and repository integration)
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         {children}
       </body>
     </html>
