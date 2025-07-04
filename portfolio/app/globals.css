@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -143,6 +144,25 @@
 
 .animation-delay-600 {
   animation-delay: 0.6s;
+=======
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+  --primary: #2563eb;
+  --primary-foreground: #ffffff;
+  --secondary: #e2e8f0;
+  --secondary-foreground: #172554;
+  --destructive: #dc2626;
+  --destructive-foreground: #ffffff;
+  --border: #e5e7eb;
+  --ring: #3b82f6;
+  --muted: #f3f4f6;
+  --muted-foreground: #6b7280;
+  --accent: #f5f3ff;
+  --accent-foreground: #5b21b6;
+>>>>>>> 72aee49 (Create Next.js portfolio with GitHub profile and repository integration)
 }
 
 @theme inline {
