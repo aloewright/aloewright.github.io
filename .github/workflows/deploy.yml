@@ -1,10 +1,15 @@
-name: Deploy to GitHub Pages
+# LEGACY WORKFLOW - DISABLED
+# This workflow has been replaced by gh-pages.yaml
+# which uses the peaceiris/actions-gh-pages@v3 action as specified in requirements
+
+name: Deploy to GitHub Pages (Legacy)
 
 on:
-  push:
-    branches:
-      - main
-      - master
+  # Disabled - using gh-pages.yaml instead
+  # push:
+  #   branches:
+  #     - main
+  #     - master
   workflow_dispatch:
 
 permissions:
