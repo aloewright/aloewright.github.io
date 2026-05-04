@@ -6,7 +6,7 @@ const username = "aloewright";
 const FEATURED_REPOS = [
   "spooool",
   "harborline",
-  "cloudos",
+  "post-pilot",
   "alexometer",
   "lean-extensions",
 ] as const;
@@ -71,9 +71,8 @@ const FALLBACK_REPO_META: Record<
     stargazers_count: 0,
     language: "Swift",
   },
-  cloudos: {
-    description:
-      "CloudOS — a fully online operating system built on Cloudflare Workers with tldraw as a windowing layer.",
+  "post-pilot": {
+    description: null,
     stargazers_count: 1,
     language: "TypeScript",
   },
