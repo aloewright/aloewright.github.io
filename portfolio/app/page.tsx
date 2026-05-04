@@ -74,7 +74,8 @@ const FALLBACK_REPO_META: Record<
     language: "Swift",
   },
   "post-pilot": {
-    description: null,
+    description:
+      "A curated library of author-voice specifications for AI agents. Cloudflare Worker (Hono + Drizzle/D1) serving a React + TanStack Router catalog, with AI Gateway-routed generation and deterministic rubric scoring.",
     stargazers_count: 1,
     language: "TypeScript",
   },
@@ -91,7 +92,8 @@ const FALLBACK_REPO_META: Record<
     language: "TypeScript",
   },
   "book-cook": {
-    description: null,
+    description:
+      "Solo-author SaaS that takes a book from market research to a launch-ready Kindle and Audible release. Cloudflare Workers + D1/KV/R2, Better Auth, and an Editorial Assistant chat agent.",
     stargazers_count: 0,
     language: "TypeScript",
   },
