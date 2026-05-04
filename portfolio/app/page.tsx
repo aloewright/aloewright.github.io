@@ -41,31 +41,90 @@ type Repo = {
   language: string | null;
 };
 
-async function getGithubUser() {
-  const res = await fetch(`https://api.github.com/users/${username}`, {
-    next: { revalidate: 60 * 60 },
-  });
-  if (!res.ok) throw new Error("Failed to fetch GitHub profile");
-  return (await res.json()) as {
-    avatar_url: string;
-    name: string;
-    bio: string;
-    html_url: string;
-  };
+type GithubUser = {
+  avatar_url: string;
+  name: string;
+  bio: string;
+  html_url: string;
+};
+
+const FALLBACK_USER: GithubUser = {
+  avatar_url: `https://avatars.githubusercontent.com/${username}`,
+  name: "Alex Wright",
+  bio: "Building local-first apps and Cloudflare-native tools.",
+  html_url: `https://github.com/${username}`,
+};
+
+const FALLBACK_REPO_META: Record<
+  (typeof FEATURED_REPOS)[number],
+  Omit<Repo, "id" | "html_url" | "name">
+> = {
+  spooool: {
+    description:
+      "A YouTube alternative built entirely on Cloudflare infrastructure — Workers for compute, R2 for storage.",
+    stargazers_count: 3,
+    language: "TypeScript",
+  },
+  harborline: {
+    description:
+      "Local-first Apple AI operator for iPhone, iPad, and Mac — built on Foundation Models and App Intents.",
+    stargazers_count: 0,
+    language: "Swift",
+  },
+  cloudos: {
+    description:
+      "CloudOS — a fully online operating system built on Cloudflare Workers with tldraw as a windowing layer.",
+    stargazers_count: 1,
+    language: "TypeScript",
+  },
+  alexometer: {
+    description:
+      "Inspect any website's design — extract colors, fonts, spacing, SVGs, Lottie, and more.",
+    stargazers_count: 0,
+    language: "TypeScript",
+  },
+  "lean-extensions": {
+    description:
+      "Keep your browser lean and fast. Manage extensions, collect links, capture pages.",
+    stargazers_count: 1,
+    language: "TypeScript",
+  },
+};
+
+async function getGithubUser(): Promise<GithubUser> {
+  try {
+    const res = await fetch(`https://api.github.com/users/${username}`, {
+      next: { revalidate: 60 * 60 },
+    });
+    if (!res.ok) return FALLBACK_USER;
+    return (await res.json()) as GithubUser;
+  } catch {
+    return FALLBACK_USER;
+  }
 }
 
 async function getFeaturedRepos(): Promise<Repo[]> {
   const results = await Promise.all(
-    FEATURED_REPOS.map(async (name) => {
-      const res = await fetch(
-        `https://api.github.com/repos/${username}/${name}`,
-        { next: { revalidate: 60 * 60 } },
-      );
-      if (!res.ok) return null;
-      return (await res.json()) as Repo;
+    FEATURED_REPOS.map(async (name, index): Promise<Repo> => {
+      const fallback: Repo = {
+        id: index,
+        name,
+        html_url: `https://github.com/${username}/${name}`,
+        ...FALLBACK_REPO_META[name],
+      };
+      try {
+        const res = await fetch(
+          `https://api.github.com/repos/${username}/${name}`,
+          { next: { revalidate: 60 * 60 } },
+        );
+        if (!res.ok) return fallback;
+        return (await res.json()) as Repo;
+      } catch {
+        return fallback;
+      }
     }),
   );
-  return results.filter((r): r is Repo => r !== null);
+  return results;
 }
 
 export default async function Home() {

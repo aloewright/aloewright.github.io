@@ -7,12 +7,10 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       {
         protocol: "https",
-        hostname: "example.com", // Adjust as necessary
+        hostname: "avatars.githubusercontent.com",
+        pathname: "/**",
       },
     ],
-  },
-  eslint: {
-    ignoreDuringBuilds: true,
   },
 };
 
