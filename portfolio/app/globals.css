@@ -1,46 +1,132 @@
 @import "tailwindcss";
 
+/*
+ * Design tokens inspired by the Nord Design System
+ * (nordhealth.design). Nord itself is licensed for Nordhealth's
+ * own products, so these values are reimplemented here as plain
+ * CSS custom properties for stylistic consistency only.
+ */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-  --primary: #2563eb;
-  --primary-foreground: #ffffff;
-  --secondary: #e2e8f0;
-  --secondary-foreground: #172554;
-  --destructive: #dc2626;
+  --n-color-background: #fafbfb;
+  --n-color-surface: #ffffff;
+  --n-color-surface-raised: #fafbfb;
+  --n-color-surface-lowered: #e6e8eb;
+  --n-color-border: #d8dee4;
+  --n-color-border-hover: #667680;
+  --n-color-border-strong: #bcc5cc;
+
+  --n-color-accent: #3559c7;
+  --n-color-accent-hover: #2845a8;
+  --n-color-text-on-accent: #ffffff;
+
+  --n-color-text: #0c1a3d;
+  --n-color-text-weak: #36434a;
+  --n-color-text-weaker: #667680;
+  --n-color-text-weakest: #b2babf;
+  --n-color-text-link: #3559c7;
+
+  --n-color-status-info-weak: #f0f4ff;
+  --n-color-status-success-weak: #ebf9eb;
+  --n-color-status-progress-weak: #e7f9fb;
+  --n-color-status-highlight-weak: #f9f1fe;
+  --n-color-status-warning-weak: #fffae1;
+  --n-color-status-neutral-weak: #f1f3f5;
+
+  --n-border-radius-s: 3px;
+  --n-border-radius: 5px;
+  --n-border-radius-pill: 999px;
+
+  --n-space-xs: 4px;
+  --n-space-s: 8px;
+  --n-space-m: 16px;
+  --n-space-l: 24px;
+  --n-space-xl: 36px;
+  --n-space-xxl: 72px;
+
+  --n-font-size-xs: 0.6875rem;
+  --n-font-size-s: 0.75rem;
+  --n-font-size-m: 0.875rem;
+  --n-font-size-l: 1rem;
+  --n-font-size-xl: 1.25rem;
+  --n-font-size-xxl: 1.5rem;
+  --n-font-size-xxxl: 2.25rem;
+
+  --n-font-weight: 400;
+  --n-font-weight-active: 500;
+  --n-font-weight-heading: 600;
+  --n-font-weight-strong: 670;
+
+  --n-line-height-tight: 1.15;
+  --n-line-height-heading: 1.2;
+  --n-line-height: 1.5;
+
+  --n-box-shadow-card:
+    0 0 0 1px var(--n-color-border),
+    0 1px 5px rgba(12, 12, 12, 0.05),
+    0 0 40px rgba(12, 12, 12, 0.015);
+  --n-box-shadow-header: 0 1px 5px rgba(12, 12, 12, 0.05);
+
+  --n-transition-quickly: 0.05s ease;
+  --n-transition-slowly: 0.2s ease;
+
+  /* shadcn aliases mapped to Nord tokens */
+  --background: var(--n-color-background);
+  --foreground: var(--n-color-text);
+  --primary: var(--n-color-accent);
+  --primary-foreground: var(--n-color-text-on-accent);
+  --secondary: var(--n-color-status-neutral-weak);
+  --secondary-foreground: var(--n-color-text);
+  --destructive: #d24023;
   --destructive-foreground: #ffffff;
-  --border: #e5e7eb;
-  --ring: #3b82f6;
-  --muted: #f3f4f6;
-  --muted-foreground: #6b7280;
-  --accent: #f5f3ff;
-  --accent-foreground: #5b21b6;
+  --border: var(--n-color-border);
+  --input: var(--n-color-border);
+  --ring: var(--n-color-accent);
+  --muted: var(--n-color-status-neutral-weak);
+  --muted-foreground: var(--n-color-text-weaker);
+  --accent: var(--n-color-status-info-weak);
+  --accent-foreground: var(--n-color-accent);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-border: var(--border);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html,
+body {
+  background: var(--n-color-background);
+  color: var(--n-color-text);
+  font-family: var(--font-geist-sans), -apple-system, BlinkMacSystemFont,
+    "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji",
+    "Segoe UI Emoji";
+  font-size: var(--n-font-size-m);
+  line-height: var(--n-line-height);
+  font-feature-settings: "kern" 1, "tnum" 1, "calt" 1, "case" 1, "ss03" 1;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+a {
+  color: var(--n-color-text-link);
+  text-decoration: none;
+}
+a:hover {
+  text-decoration: underline;
 }
 
 @keyframes fadeInUp {
   from {
     opacity: 0;
-    transform: translateY(12px);
+    transform: translateY(8px);
   }
   to {
     opacity: 1;
@@ -50,5 +136,5 @@ body {
 
 .fade-in-up {
   opacity: 0;
-  animation: fadeInUp 0.5s ease-out forwards;
+  animation: fadeInUp 0.4s ease-out forwards;
 }
