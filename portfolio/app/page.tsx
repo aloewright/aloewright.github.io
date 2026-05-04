@@ -1,14 +1,16 @@
 import Image from "next/image";
 import { Github, Linkedin, Globe, Star, ArrowUpRight } from "lucide-react";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 const username = "aloewright";
 
 const FEATURED_REPOS = [
   "spooool",
   "harborline",
-  "cloudos",
+  "post-pilot",
   "alexometer",
   "lean-extensions",
+  "book-cook",
 ] as const;
 
 const TECH_STACK: Record<string, string[]> = {
@@ -71,9 +73,8 @@ const FALLBACK_REPO_META: Record<
     stargazers_count: 0,
     language: "Swift",
   },
-  cloudos: {
-    description:
-      "CloudOS — a fully online operating system built on Cloudflare Workers with tldraw as a windowing layer.",
+  "post-pilot": {
+    description: null,
     stargazers_count: 1,
     language: "TypeScript",
   },
@@ -87,6 +88,11 @@ const FALLBACK_REPO_META: Record<
     description:
       "Keep your browser lean and fast. Manage extensions, collect links, capture pages.",
     stargazers_count: 1,
+    language: "TypeScript",
+  },
+  "book-cook": {
+    description: null,
+    stargazers_count: 0,
     language: "TypeScript",
   },
 };
@@ -134,7 +140,10 @@ export default async function Home() {
   ]);
 
   return (
-    <main className="mx-auto w-full max-w-3xl px-6 py-16 flex flex-col gap-12">
+    <main className="mx-auto w-full max-w-3xl px-6 py-8 sm:py-12 flex flex-col gap-10">
+      <div className="flex justify-end">
+        <ThemeToggle />
+      </div>
       <header
         className="flex flex-col sm:flex-row items-center sm:items-start gap-6 fade-in-up"
         style={{ animationDelay: "60ms" }}
