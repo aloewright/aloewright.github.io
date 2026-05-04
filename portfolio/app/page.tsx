@@ -9,30 +9,8 @@ const FEATURED_REPOS = [
   "harborline",
   "post-pilot",
   "alexometer",
-  "lean-extensions",
   "book-cook",
 ] as const;
-
-const TECH_STACK: Record<string, string[]> = {
-  Languages: ["TypeScript", "JavaScript", "Swift", "Rust", "Go", "Python"],
-  Frameworks: ["Next.js", "React", "SwiftUI", "Hono", "Vite", "Tailwind CSS"],
-  Platforms: [
-    "Cloudflare Workers",
-    "Cloudflare D1",
-    "Cloudflare R2",
-    "iOS",
-    "macOS",
-    "watchOS",
-  ],
-  Tooling: [
-    "Drizzle ORM",
-    "Better Auth",
-    "MCP",
-    "tldraw",
-    "Foundation Models",
-    "ChromaDB",
-  ],
-};
 
 type Repo = {
   id: number;
@@ -41,6 +19,7 @@ type Repo = {
   description: string | null;
   stargazers_count: number;
   language: string | null;
+  tech: string[];
 };
 
 type GithubUser = {
@@ -63,39 +42,77 @@ const FALLBACK_REPO_META: Record<
 > = {
   spooool: {
     description:
-      "A YouTube alternative built entirely on Cloudflare infrastructure — Workers for compute, R2 for storage.",
+      "A YouTube alternative built entirely on Cloudflare infrastructure — Workers for API/frontend, R2 for storage, Stream for encoding/delivery, D1 for metadata, Durable Objects for state.",
     stargazers_count: 3,
     language: "TypeScript",
+    tech: [
+      "TypeScript",
+      "React",
+      "Vite",
+      "Hono",
+      "Cloudflare Workers",
+      "Cloudflare R2",
+      "Cloudflare D1",
+      "Cloudflare Stream",
+      "Durable Objects",
+    ],
   },
   harborline: {
     description:
       "Local-first Apple AI operator for iPhone, iPad, and Mac — built on Foundation Models and App Intents.",
     stargazers_count: 0,
     language: "Swift",
+    tech: [
+      "Swift",
+      "SwiftUI",
+      "iOS",
+      "macOS",
+      "Foundation Models",
+      "App Intents",
+    ],
   },
   "post-pilot": {
     description:
       "A curated library of author-voice specifications for AI agents. Cloudflare Worker (Hono + Drizzle/D1) serving a React + TanStack Router catalog, with AI Gateway-routed generation and deterministic rubric scoring.",
     stargazers_count: 1,
     language: "TypeScript",
+    tech: [
+      "TypeScript",
+      "React",
+      "Vite",
+      "Hono",
+      "Tailwind CSS",
+      "TanStack Router",
+      "Cloudflare Workers",
+      "Cloudflare D1",
+      "Drizzle ORM",
+    ],
   },
   alexometer: {
     description:
-      "Inspect any website's design — extract colors, fonts, spacing, SVGs, Lottie, and more.",
+      "Inspect any website's design — extract colors, fonts, spacing, SVGs, Lottie, and export to code.",
     stargazers_count: 0,
     language: "TypeScript",
-  },
-  "lean-extensions": {
-    description:
-      "Keep your browser lean and fast. Manage extensions, collect links, capture pages.",
-    stargazers_count: 1,
-    language: "TypeScript",
+    tech: ["TypeScript", "React", "Tailwind CSS"],
   },
   "book-cook": {
     description:
       "Solo-author SaaS that takes a book from market research to a launch-ready Kindle and Audible release. Cloudflare Workers + D1/KV/R2, Better Auth, and an Editorial Assistant chat agent.",
     stargazers_count: 0,
     language: "TypeScript",
+    tech: [
+      "TypeScript",
+      "React",
+      "Vite",
+      "Hono",
+      "BlockNote",
+      "TanStack Router",
+      "Cloudflare Workers",
+      "Cloudflare D1",
+      "Cloudflare R2",
+      "Drizzle ORM",
+      "Better Auth",
+    ],
   },
 };
 
@@ -114,11 +131,12 @@ async function getGithubUser(): Promise<GithubUser> {
 async function getFeaturedRepos(): Promise<Repo[]> {
   const results = await Promise.all(
     FEATURED_REPOS.map(async (name, index): Promise<Repo> => {
+      const meta = FALLBACK_REPO_META[name];
       const fallback: Repo = {
         id: index,
         name,
         html_url: `https://github.com/${username}/${name}`,
-        ...FALLBACK_REPO_META[name],
+        ...meta,
       };
       try {
         const res = await fetch(
@@ -126,7 +144,8 @@ async function getFeaturedRepos(): Promise<Repo[]> {
           { next: { revalidate: 60 * 60 } },
         );
         if (!res.ok) return fallback;
-        return (await res.json()) as Repo;
+        const live = (await res.json()) as Omit<Repo, "tech">;
+        return { ...live, tech: meta.tech };
       } catch {
         return fallback;
       }
@@ -218,41 +237,10 @@ export default async function Home() {
         </ul>
       </section>
 
-      <section
-        className="fade-in-up"
-        style={{ animationDelay: "260ms" }}
-        aria-labelledby="stack"
-      >
-        <SectionHeading id="stack" eyebrow="Toolbox">
-          Languages, frameworks &amp; technologies
-        </SectionHeading>
-        <dl className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-6">
-          {Object.entries(TECH_STACK).map(([group, items]) => (
-            <div key={group}>
-              <dt
-                className="uppercase tracking-wider"
-                style={{
-                  fontSize: "var(--n-font-size-xs)",
-                  color: "var(--n-color-text-weaker)",
-                  fontWeight: "var(--n-font-weight-active)",
-                }}
-              >
-                {group}
-              </dt>
-              <dd className="mt-2 flex flex-wrap gap-1.5">
-                {items.map((item) => (
-                  <Tag key={item}>{item}</Tag>
-                ))}
-              </dd>
-            </div>
-          ))}
-        </dl>
-      </section>
-
       <footer
         className="pt-6 fade-in-up"
         style={{
-          animationDelay: "340ms",
+          animationDelay: "260ms",
           borderTop: "1px solid var(--n-color-border)",
           color: "var(--n-color-text-weaker)",
           fontSize: "var(--n-font-size-s)",
@@ -387,35 +375,27 @@ function RepoCard({ repo }: { repo: Repo }) {
           {repo.description}
         </p>
       )}
-      <div
-        className="mt-4 flex items-center gap-3"
-        style={{
-          fontSize: "var(--n-font-size-s)",
-          color: "var(--n-color-text-weaker)",
-        }}
-      >
-        {repo.language && (
-          <span className="inline-flex items-center gap-1.5">
-            <span
-              aria-hidden
-              style={{
-                width: 8,
-                height: 8,
-                borderRadius: "var(--n-border-radius-pill)",
-                background: languageColor(repo.language),
-                display: "inline-block",
-              }}
-            />
-            {repo.language}
-          </span>
-        )}
-        {repo.stargazers_count > 0 && (
+      {repo.tech.length > 0 && (
+        <div className="mt-3 flex flex-wrap gap-1.5">
+          {repo.tech.map((item) => (
+            <Tag key={item}>{item}</Tag>
+          ))}
+        </div>
+      )}
+      {repo.stargazers_count > 0 && (
+        <div
+          className="mt-3 flex items-center gap-3"
+          style={{
+            fontSize: "var(--n-font-size-s)",
+            color: "var(--n-color-text-weaker)",
+          }}
+        >
           <span className="inline-flex items-center gap-1">
             <Star className="h-3 w-3" />
             {repo.stargazers_count}
           </span>
-        )}
-      </div>
+        </div>
+      )}
     </a>
   );
 }
@@ -441,17 +421,3 @@ function Tag({ children }: { children: React.ReactNode }) {
   );
 }
 
-function languageColor(language: string): string {
-  const colors: Record<string, string> = {
-    TypeScript: "#3178c6",
-    JavaScript: "#f1e05a",
-    Swift: "#F05138",
-    Rust: "#dea584",
-    Go: "#00ADD8",
-    Python: "#3572A5",
-    HTML: "#e34c26",
-    CSS: "#563d7c",
-    Shell: "#89e051",
-  };
-  return colors[language] ?? "var(--n-color-text-weakest)";
-}
