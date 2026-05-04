@@ -1,8 +1,45 @@
-import { Button } from "@/components/ui/button";
 import Image from "next/image";
-import { Github, Linkedin, Globe } from "lucide-react";
+import { Github, Linkedin, Globe, Star, ArrowUpRight } from "lucide-react";
 
 const username = "aloewright";
+
+const FEATURED_REPOS = [
+  "spooool",
+  "harborline",
+  "cloudos",
+  "alexometer",
+  "lean-extensions",
+] as const;
+
+const TECH_STACK: Record<string, string[]> = {
+  Languages: ["TypeScript", "JavaScript", "Swift", "Rust", "Go", "Python"],
+  Frameworks: ["Next.js", "React", "SwiftUI", "Hono", "Vite", "Tailwind CSS"],
+  Platforms: [
+    "Cloudflare Workers",
+    "Cloudflare D1",
+    "Cloudflare R2",
+    "iOS",
+    "macOS",
+    "watchOS",
+  ],
+  Tooling: [
+    "Drizzle ORM",
+    "Better Auth",
+    "MCP",
+    "tldraw",
+    "Foundation Models",
+    "ChromaDB",
+  ],
+};
+
+type Repo = {
+  id: number;
+  name: string;
+  html_url: string;
+  description: string | null;
+  stargazers_count: number;
+  language: string | null;
+};
 
 async function getGithubUser() {
   const res = await fetch(`https://api.github.com/users/${username}`, {
@@ -17,76 +54,334 @@ async function getGithubUser() {
   };
 }
 
-async function getGithubRepos() {
-  const res = await fetch(`https://api.github.com/users/${username}/repos?per_page=100&sort=updated`, {
-    next: { revalidate: 60 * 60 },
-  });
-  if (!res.ok) throw new Error("Failed to fetch repositories");
-  return (await res.json()) as Array<{
-    id: number;
-    name: string;
-    html_url: string;
-    description: string | null;
-    stargazers_count: number;
-    language: string | null;
-  }>;
+async function getFeaturedRepos(): Promise<Repo[]> {
+  const results = await Promise.all(
+    FEATURED_REPOS.map(async (name) => {
+      const res = await fetch(
+        `https://api.github.com/repos/${username}/${name}`,
+        { next: { revalidate: 60 * 60 } },
+      );
+      if (!res.ok) return null;
+      return (await res.json()) as Repo;
+    }),
+  );
+  return results.filter((r): r is Repo => r !== null);
 }
 
 export default async function Home() {
-  const [user, repos] = await Promise.all([getGithubUser(), getGithubRepos()]);
+  const [user, repos] = await Promise.all([
+    getGithubUser(),
+    getFeaturedRepos(),
+  ]);
 
   return (
-    <main className="container mx-auto max-w-4xl px-4 py-12 flex flex-col gap-12">
-      <header className="flex flex-col sm:flex-row items-center gap-6 fade-in-up" style={{animationDelay: '100ms'}}>
+    <main className="mx-auto w-full max-w-3xl px-6 py-16 flex flex-col gap-12">
+      <header
+        className="flex flex-col sm:flex-row items-center sm:items-start gap-6 fade-in-up"
+        style={{ animationDelay: "60ms" }}
+      >
         <Image
           src={user.avatar_url}
           alt={user.name ?? username}
-          width={112}
-          height={112}
-          className="rounded-full border border-border"
+          width={96}
+          height={96}
+          className="rounded-full"
+          style={{ border: "1px solid var(--n-color-border)" }}
+          priority
         />
-        <div className="text-center sm:text-left fade-in-up" style={{animationDelay: '200ms'}}>
-          <h1 className="text-3xl font-bold">{user.name ?? username}</h1>
-          {user.bio && <p className="text-muted-foreground mt-2 max-w-prose">{user.bio}</p>}
-          {/* Social links */}
-          <div className="flex flex-wrap justify-center sm:justify-start gap-2 mt-4 fade-in-up" style={{animationDelay:'250ms'}}>
-            <Button asChild size="sm" variant="outline">
-              <a href={user.html_url} target="_blank" rel="noreferrer" className="flex items-center gap-1">
-                <Github className="h-4 w-4" /> GitHub
-              </a>
-            </Button>
-            <Button asChild size="sm" variant="outline">
-              <a href="https://linkedin.com/in/aloewright" target="_blank" rel="noreferrer" className="flex items-center gap-1">
-                <Linkedin className="h-4 w-4" /> LinkedIn
-              </a>
-            </Button>
-            <Button asChild size="sm" variant="outline">
-              <a href="https://aloewright.com" target="_blank" rel="noreferrer" className="flex items-center gap-1">
-                <Globe className="h-4 w-4" /> Website
-              </a>
-            </Button>
-          </div>
+        <div className="text-center sm:text-left flex-1 min-w-0">
+          <h1
+            className="font-semibold tracking-tight"
+            style={{
+              fontSize: "var(--n-font-size-xxxl)",
+              lineHeight: "var(--n-line-height-heading)",
+              color: "var(--n-color-text)",
+            }}
+          >
+            {user.name ?? username}
+          </h1>
+          {user.bio && (
+            <p
+              className="mt-3 max-w-prose mx-auto sm:mx-0"
+              style={{
+                color: "var(--n-color-text-weak)",
+                fontSize: "var(--n-font-size-l)",
+              }}
+            >
+              {user.bio}
+            </p>
+          )}
+          <nav className="flex flex-wrap justify-center sm:justify-start gap-2 mt-5">
+            <SocialLink
+              href={user.html_url}
+              icon={<Github className="h-4 w-4" />}
+              label="GitHub"
+            />
+            <SocialLink
+              href="https://linkedin.com/in/aloewright"
+              icon={<Linkedin className="h-4 w-4" />}
+              label="LinkedIn"
+            />
+            <SocialLink
+              href="https://aloewright.com"
+              icon={<Globe className="h-4 w-4" />}
+              label="Website"
+            />
+          </nav>
         </div>
       </header>
 
-      <section>
-        <h2 className="text-2xl font-semibold mb-6 fade-in-up" style={{animationDelay: '300ms'}}>Repositories</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-          {repos.map((repo, i) => (
-            <Button
-              asChild
-              key={repo.id}
-              variant="outline"
-              className="justify-start overflow-hidden text-ellipsis whitespace-nowrap fade-in-up"
-              style={{animationDelay: `${400 + i*50}ms`}}
-            >
-              <a href={repo.html_url} target="_blank" rel="noreferrer" title={repo.description ?? repo.name}>
-                {repo.name}
-              </a>
-            </Button>
+      <section
+        className="fade-in-up"
+        style={{ animationDelay: "180ms" }}
+        aria-labelledby="featured"
+      >
+        <SectionHeading id="featured" eyebrow="Selected work">
+          Featured projects
+        </SectionHeading>
+        <ul className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {repos.map((repo) => (
+            <li key={repo.id}>
+              <RepoCard repo={repo} />
+            </li>
           ))}
-        </div>
+        </ul>
       </section>
+
+      <section
+        className="fade-in-up"
+        style={{ animationDelay: "260ms" }}
+        aria-labelledby="stack"
+      >
+        <SectionHeading id="stack" eyebrow="Toolbox">
+          Languages, frameworks &amp; technologies
+        </SectionHeading>
+        <dl className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-6">
+          {Object.entries(TECH_STACK).map(([group, items]) => (
+            <div key={group}>
+              <dt
+                className="uppercase tracking-wider"
+                style={{
+                  fontSize: "var(--n-font-size-xs)",
+                  color: "var(--n-color-text-weaker)",
+                  fontWeight: "var(--n-font-weight-active)",
+                }}
+              >
+                {group}
+              </dt>
+              <dd className="mt-2 flex flex-wrap gap-1.5">
+                {items.map((item) => (
+                  <Tag key={item}>{item}</Tag>
+                ))}
+              </dd>
+            </div>
+          ))}
+        </dl>
+      </section>
+
+      <footer
+        className="pt-6 fade-in-up"
+        style={{
+          animationDelay: "340ms",
+          borderTop: "1px solid var(--n-color-border)",
+          color: "var(--n-color-text-weaker)",
+          fontSize: "var(--n-font-size-s)",
+        }}
+      >
+        Built with Next.js. Styled with design tokens inspired by{" "}
+        <a
+          href="https://nordhealth.design/start"
+          target="_blank"
+          rel="noreferrer"
+        >
+          Nord Design System
+        </a>
+        .
+      </footer>
     </main>
   );
+}
+
+function SectionHeading({
+  id,
+  eyebrow,
+  children,
+}: {
+  id?: string;
+  eyebrow: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="flex flex-col gap-1">
+      <span
+        className="uppercase tracking-wider"
+        style={{
+          fontSize: "var(--n-font-size-xs)",
+          color: "var(--n-color-text-weaker)",
+          fontWeight: "var(--n-font-weight-active)",
+        }}
+      >
+        {eyebrow}
+      </span>
+      <h2
+        id={id}
+        className="font-semibold"
+        style={{
+          fontSize: "var(--n-font-size-xxl)",
+          lineHeight: "var(--n-line-height-heading)",
+          color: "var(--n-color-text)",
+        }}
+      >
+        {children}
+      </h2>
+    </div>
+  );
+}
+
+function SocialLink({
+  href,
+  icon,
+  label,
+}: {
+  href: string;
+  icon: React.ReactNode;
+  label: string;
+}) {
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noreferrer"
+      className="inline-flex items-center gap-1.5 transition-colors"
+      style={{
+        height: "32px",
+        padding: "0 var(--n-space-m)",
+        borderRadius: "var(--n-border-radius)",
+        border: "1px solid var(--n-color-border)",
+        background: "var(--n-color-surface)",
+        color: "var(--n-color-text)",
+        fontSize: "var(--n-font-size-m)",
+        fontWeight: "var(--n-font-weight-active)",
+        textDecoration: "none",
+        transition: "var(--n-transition-quickly)",
+      }}
+    >
+      {icon}
+      {label}
+    </a>
+  );
+}
+
+function RepoCard({ repo }: { repo: Repo }) {
+  return (
+    <a
+      href={repo.html_url}
+      target="_blank"
+      rel="noreferrer"
+      className="group block h-full"
+      style={{
+        padding: "var(--n-space-m)",
+        background: "var(--n-color-surface)",
+        borderRadius: "var(--n-border-radius)",
+        boxShadow: "var(--n-box-shadow-card)",
+        transition: "var(--n-transition-slowly)",
+        textDecoration: "none",
+        color: "inherit",
+      }}
+    >
+      <div className="flex items-start justify-between gap-3">
+        <h3
+          className="truncate"
+          style={{
+            color: "var(--n-color-text-link)",
+            fontWeight: "var(--n-font-weight-heading)",
+            fontSize: "var(--n-font-size-l)",
+          }}
+        >
+          {repo.name}
+        </h3>
+        <ArrowUpRight
+          className="h-4 w-4 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
+          style={{ color: "var(--n-color-text-weaker)" }}
+        />
+      </div>
+      {repo.description && (
+        <p
+          className="mt-2 line-clamp-3"
+          style={{
+            color: "var(--n-color-text-weak)",
+            fontSize: "var(--n-font-size-m)",
+            lineHeight: "var(--n-line-height)",
+          }}
+        >
+          {repo.description}
+        </p>
+      )}
+      <div
+        className="mt-4 flex items-center gap-3"
+        style={{
+          fontSize: "var(--n-font-size-s)",
+          color: "var(--n-color-text-weaker)",
+        }}
+      >
+        {repo.language && (
+          <span className="inline-flex items-center gap-1.5">
+            <span
+              aria-hidden
+              style={{
+                width: 8,
+                height: 8,
+                borderRadius: "var(--n-border-radius-pill)",
+                background: languageColor(repo.language),
+                display: "inline-block",
+              }}
+            />
+            {repo.language}
+          </span>
+        )}
+        {repo.stargazers_count > 0 && (
+          <span className="inline-flex items-center gap-1">
+            <Star className="h-3 w-3" />
+            {repo.stargazers_count}
+          </span>
+        )}
+      </div>
+    </a>
+  );
+}
+
+function Tag({ children }: { children: React.ReactNode }) {
+  return (
+    <span
+      style={{
+        display: "inline-flex",
+        alignItems: "center",
+        height: "24px",
+        padding: "0 var(--n-space-s)",
+        borderRadius: "var(--n-border-radius-pill)",
+        background: "var(--n-color-status-neutral-weak)",
+        color: "var(--n-color-text)",
+        fontSize: "var(--n-font-size-s)",
+        fontWeight: "var(--n-font-weight-active)",
+        border: "1px solid var(--n-color-border)",
+      }}
+    >
+      {children}
+    </span>
+  );
+}
+
+function languageColor(language: string): string {
+  const colors: Record<string, string> = {
+    TypeScript: "#3178c6",
+    JavaScript: "#f1e05a",
+    Swift: "#F05138",
+    Rust: "#dea584",
+    Go: "#00ADD8",
+    Python: "#3572A5",
+    HTML: "#e34c26",
+    CSS: "#563d7c",
+    Shell: "#89e051",
+  };
+  return colors[language] ?? "var(--n-color-text-weakest)";
 }
