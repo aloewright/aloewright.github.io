@@ -1,0 +1,6 @@
+interface:
+  display_name: "Aloewright.github.io"
+  short_description: "Repo-specific patterns and workflows for aloewright.github.io"
+  default_prompt: "Use the aloewright.github.io repo skill to follow existing architecture, testing, and workflow conventions."
+policy:
+  allow_implicit_invocation: true
